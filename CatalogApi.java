@@ -58,7 +58,8 @@ public class CatalogApi {
             // Only allow GET methods
             if (!"GET".equals(exchange.getRequestMethod())) {
                 sendResponse(exchange, 405, """
-                    {"error": "Method Not Allowed"}""");
+                    {"error": "Method Not Allowed"}
+                """);
                 return;
             }
 
