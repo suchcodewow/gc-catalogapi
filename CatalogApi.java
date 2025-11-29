@@ -125,16 +125,25 @@ public class CatalogApi {
                 return;
             }
 
-            // Get version from environment variable
-            var version = System.getenv().getOrDefault("APP_VERSION", "1.0.0");
+            // Get configuration from environment variables
+            var version = System.getenv().getOrDefault("APP_VERSION", "0.1");
+            var animalEnv = System.getenv().getOrDefault("APP_ANIMAL", "unknown");
+
+            // Process ASCII art for JSON safety
+            var rawArt = getAnimalArt(animalEnv);
+            var escapedArt = rawArt
+                .replace("\\", "\\\\")  // Escape backslashes for JSON
+                .replace("\"", "\\\"")  // Escape quotes for JSON
+                .replace("\n", "\\n");  // Escape newlines for JSON
 
             var response = """
                 {
                     "status": "OK",
                     "service": "CatalogApi",
                     "version": "%s",
-                    "itemsLoaded": %d
-                }""".formatted(version, catalog.size());
+                    "itemsLoaded": %d,
+                    "mascot": "%s"
+                }""".formatted(version, catalog.size(), escapedArt);
                 
             sendResponse(exchange, 200, response);
         }
@@ -147,6 +156,93 @@ public class CatalogApi {
                 os.write(responseBytes);
             }
         }
+    }
+    /**
+     * Returns the ASCII art for the requested animal.
+     */
+    private static String getAnimalArt(String animal) {
+        return switch (animal.toLowerCase()) {
+            case "monkey" -> """
+                            __,__
+                .--.  .-"     "-.  .--.
+                / .. \\/  .-. .-.  \\/ .. \\
+                | |  '|  /   Y   \\  |'  | |
+                | \\   \\  \\ 0 | 0 /  /   / |
+                \\ '- ,\\.-"`` ``"-./, -' /
+                `'-' /_   ^ ^   _\\ '-'`
+                    |  \\\\._   _./  |
+                    \\   \\ `~` /   /
+                     '._ '-=-' _.'
+                        '~---~'
+                """;
+            case "canary" -> """
+                    .-"-.
+                    / 4 4 \\
+                    \\_ v _/
+                    //   \\      
+                ((     ))
+            =======""===""=======
+                    |||
+                    '|'
+                """;
+            case "dog" -> """
+                    /^-^\\
+                   / o o \\
+                  /   Y   \\
+                  V \\ v / V
+                    / - \\
+                   /    |
+             (    /     |
+              ===/___) ||
+                """;
+            case "cat" -> """
+            |\\---/|
+            | ,_, |
+             \\_`_/-..----.
+          ___/ `   ' ,""+ \\  
+         (__...'   __\\    |`.___.';
+           (_,...'(_,.`__)/'.....+
+                """;
+            case "rabbit" -> """
+                    ,
+                   /|      __
+                  / |   ,-~ /
+                 Y :|  //  /
+                 | jj /( .^
+                 >-"~"-v"
+                /       Y
+                jo  o    |
+               ( ~T~     j
+                >._-' _./
+              /   "~"  |
+             Y     _,  |
+            /| ;-"~ _  l
+           / l/ ,-"~    \\
+           \\//\\/      .- \\
+            Y        /    Y
+            l       I     !
+            ]\\      _\\    /"\\
+           (" ~----( ~   Y.  )
+                """;
+            case "tiger" -> """
+                 ('__')
+                 ( oo )
+                 (_)_)
+                """;
+            case "dragon" -> """
+                                _ ___                /^^\\ /^\\  /^^\\_
+                    _          _@)@) \\            ,,/ '` ~ `'~~ ', `\\.
+                _/o\\_ _ _ _/~`.`...'~\\        ./~~..,'`','',.,' '  ~:
+                / `,'.~,~.~  .   , . , ~|,   ,/ .,' , ,. .. ,,.   `,  ~\\_
+                ( ' _' _ '_` _  '  .    , `\\_/ .' ..' '  `  `   `..  `,   \\_
+                ~V~ V~ V~ V~ ~\\ `   ' .  '    , ' .,.,''`.,.''`.,.``. ',   \\_
+                _/\\ /\\ /\\ /\\_/, . ' ,   `_/~\\_ .' .,. ,, , _/~\\_ `. `. '.,  \\_
+                < ~ ~ '~`'~'`, .,  .   `_: ::: \\_ '      `_/ ::: \\_ `.,' . ',  \\_
+                \\ ' `_  '`_    _    ',/ _::_::_ \\ _    _/ _::_::_ \\   `.,'.,`., \\-,-,-,_,_,
+                `'~~ `'~~ `'~~ `'~~  \\(_)(_)(_)/  `~~' \\(_)(_)(_)/ ~'`\\_.._,._,'_;_;_;_;_;
+                """;
+            default -> "No mascot selected. Set APP_ANIMAL environment variable.";
+        };
     }
 
     /**
