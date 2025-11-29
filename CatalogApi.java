@@ -133,8 +133,8 @@ public class CatalogApi {
             var rawArt = getAnimalArt(animalEnv);
             var escapedArt = rawArt
                 .replace("\\", "\\\\")  // Escape backslashes for JSON
-                .replace("\"", "\\\"")  // Escape quotes for JSON
-                .replace("\n", "\\n");  // Escape newlines for JSON
+                .replace("\"", "\\\"");  // Escape quotes for JSON
+                // .replace("\n", "\\n");  // Escape newlines for JSON
 
             var response = """
                 {
