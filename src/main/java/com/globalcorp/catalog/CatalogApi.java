@@ -1,3 +1,4 @@
+package com.globalcorp.catalog;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -13,8 +14,8 @@ import com.sun.net.httpserver.HttpServer;
  * A simple, zero-dependency Java HTTP API for an item catalog.
  * Refactored for Java 20+ features (Records, Text Blocks, var).
  * * Usage:
- * 1. Compile: javac --release 20 CatalogApi.java
- * 2. Run:     java CatalogApi
+ * 1. Build:   mvn clean package
+ * 2. Run:     java -jar target/catalog-api-1.0.0-SNAPSHOT.jar
  * 3. Test:    Open browser or curl to http://localhost:8000/items/1
  */
 public class CatalogApi {
