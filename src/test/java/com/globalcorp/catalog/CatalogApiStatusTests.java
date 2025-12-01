@@ -17,54 +17,28 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.net.httpserver.HttpServer;
 
-/**
- * Tests specifically for the ItemHandler (/items endpoints).
- */
-public class CatalogApiTests {
-
+public class CatalogApiStatusTests {
+    
     private static final String BASE_URL = "http://localhost:8000";
     private static HttpServer server;
 
     @BeforeAll
     public static void start() throws IOException {
+        // Start the server before tests run
         server = CatalogApi.startServer();
     }
 
     @AfterAll
     public static void stop() {
+        // Stop the server after tests finish
         if (server != null) {
             server.stop(0);
         }
     }
 
     @Test
-    public void testGetValidItem() {
-        assertResponse("/items/1", 200, "\"id\": 1");
-    }
-
-    @Test
-    public void testGetAnotherValidItem() {
-        assertResponse("/items/50", 200, "\"id\": 50");
-    }
-
-    @Test
-    public void testGetInvalidItem() {
-        assertResponse("/items/999", 404, "\"error\": \"Item not found\"");
-    }
-
-    @Test
-    public void testGetItemsListWarning() {
-        assertResponse("/items", 200, "Use /items/{id}");
-    }
-
-    @Test
-    public void testMethodNotAllowed() throws IOException {
-        URL url = URI.create(BASE_URL + "/items/1").toURL();
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST"); // Should fail on GET-only endpoint
-        
-        int status = conn.getResponseCode();
-        assertEquals(405, status, "Expected 405 Method Not Allowed");
+    public void testStatusPage() {
+        assertResponse("/", 200, "\"status\": \"OK\"");
     }
 
     /**
