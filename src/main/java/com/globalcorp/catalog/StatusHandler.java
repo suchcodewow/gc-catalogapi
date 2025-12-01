@@ -33,7 +33,7 @@ public class StatusHandler implements HttpHandler {
         }
 
         // Get configuration from environment variables
-        var version = System.getenv().getOrDefault("APP_VERSION", "1.0");
+        var version = System.getenv().getOrDefault("APP_VERSION", "2.5");
         var animalEnv = System.getenv().getOrDefault("APP_ANIMAL", "unknown");
 
         // Process ASCII art for JSON safety
