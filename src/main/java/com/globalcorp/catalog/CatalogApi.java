@@ -1,4 +1,5 @@
 package com.globalcorp.catalog;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -12,11 +13,10 @@ import com.sun.net.httpserver.HttpServer;
 
 /**
  * A simple, zero-dependency Java HTTP API for an item catalog.
- * Refactored for Java 20+ features (Records, Text Blocks, var).
+ * Refactored for Java 11 compatibility.
  * * Usage:
  * 1. Build:   mvn clean package
  * 2. Run:     java -jar target/catalog-api-1.0.0-SNAPSHOT.jar
- * 3. Test:    Open browser or curl to http://localhost:8000/items/1
  */
 public class CatalogApi {
 
@@ -58,9 +58,7 @@ public class CatalogApi {
         public void handle(HttpExchange exchange) throws IOException {
             // Only allow GET methods
             if (!"GET".equals(exchange.getRequestMethod())) {
-                sendResponse(exchange, 405, """
-                    {"error": "Method Not Allowed"}
-                """);
+                sendResponse(exchange, 405, "{\"error\": \"Method Not Allowed\"}");
                 return;
             }
 
@@ -70,8 +68,7 @@ public class CatalogApi {
 
             // If requesting the list (just /items)
             if (parts.length == 2) {
-                sendResponse(exchange, 200, """
-                    {"message": "Use /items/{id} to get details for IDs 1-50"}""");
+                sendResponse(exchange, 200, "{\"message\": \"Use /items/{id} to get details for IDs 1-50\"}");
                 return;
             }
 
@@ -83,18 +80,15 @@ public class CatalogApi {
                         var item = catalog.get(id);
                         sendResponse(exchange, 200, item.toJson());
                     } else {
-                        sendResponse(exchange, 404, """
-                            {"error": "Item not found"}""");
+                        sendResponse(exchange, 404, "{\"error\": \"Item not found\"}");
                     }
                 } catch (NumberFormatException e) {
-                    sendResponse(exchange, 400, """
-                        {"error": "Invalid ID format"}""");
+                    sendResponse(exchange, 400, "{\"error\": \"Invalid ID format\"}");
                 }
                 return;
             }
 
-            sendResponse(exchange, 400, """
-                {"error": "Bad Request"}""");
+            sendResponse(exchange, 400, "{\"error\": \"Bad Request\"}");
         }
 
         private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
@@ -115,15 +109,13 @@ public class CatalogApi {
         public void handle(HttpExchange exchange) throws IOException {
             // Only allow GET methods
             if (!"GET".equals(exchange.getRequestMethod())) {
-                sendResponse(exchange, 405, """
-                    {"error": "Method Not Allowed"}""");
+                sendResponse(exchange, 405, "{\"error\": \"Method Not Allowed\"}");
                 return;
             }
 
             // Check if the path is exactly "/" (HttpServer maps "/" to all unmapped paths)
             if (!exchange.getRequestURI().getPath().equals("/")) {
-                sendResponse(exchange, 404, """
-                    {"error": "Not Found"}""");
+                sendResponse(exchange, 404, "{\"error\": \"Not Found\"}");
                 return;
             }
 
@@ -135,17 +127,19 @@ public class CatalogApi {
             var rawArt = getAnimalArt(animalEnv);
             var escapedArt = rawArt
                 .replace("\\", "\\\\")  // Escape backslashes for JSON
-                .replace("\"", "\\\"");  // Escape quotes for JSON
-                // .replace("\n", "\\n");  // Escape newlines for JSON
+                .replace("\"", "\\\"")  // Escape quotes for JSON
+                .replace("\n", "\\n");  // Escape newlines for JSON
 
-            var response = """
-                {
-                    "status": "OK",
-                    "service": "CatalogApi",
-                    "version": "%s",
-                    "itemsLoaded": %d,
-                    "mascot": "%s"
-                }""".formatted(version, catalog.size(), escapedArt);
+            // Use String.format (Java 11) instead of .formatted (Java 15+)
+            // Use standard string concatenation instead of Text Blocks (Java 15+)
+            var response = String.format(
+                "{\n" +
+                "    \"status\": \"OK\",\n" +
+                "    \"service\": \"CatalogApi\",\n" +
+                "    \"version\": \"%s\",\n" +
+                "    \"itemsLoaded\": %d,\n" +
+                "    \"mascot\": \"%s\"\n" +
+                "}", version, catalog.size(), escapedArt);
                 
             sendResponse(exchange, 200, response);
         }
@@ -159,92 +153,49 @@ public class CatalogApi {
             }
         }
     }
+
     /**
      * Returns the ASCII art for the requested animal.
+     * Converted from Switch Expression (Java 14+) to Switch Statement (Java 11 Compatible)
+     * Converted Text Blocks (Java 15+) to standard Strings
      */
     private static String getAnimalArt(String animal) {
-        return switch (animal.toLowerCase()) {
-            case "monkey" -> """
-                            __,__
-                .--.  .-"     "-.  .--.
-                / .. \\/  .-. .-.  \\/ .. \\
-                | |  '|  /   Y   \\  |'  | |
-                | \\   \\  \\ 0 | 0 /  /   / |
-                \\ '- ,\\.-"`` ``"-./, -' /
-                `'-' /_   ^ ^   _\\ '-'`
-                    |  \\\\._   _./  |
-                    \\   \\ `~` /   /
-                     '._ '-=-' _.'
-                        '~---~'
-                """;
-            case "canary" -> """
-                    .-"-.
-                    / 4 4 \\
-                    \\_ v _/
-                    //   \\      
-                ((     ))
-            =======""===""=======
-                    |||
-                    '|'
-                """;
-            case "dog" -> """
-                    /^-^\\
-                   / o o \\
-                  /   Y   \\
-                  V \\ v / V
-                    / - \\
-                   /    |
-             (    /     |
-              ===/___) ||
-                """;
-            case "cat" -> """
-            |\\---/|
-            | ,_, |
-             \\_`_/-..----.
-          ___/ `   ' ,""+ \\  
-         (__...'   __\\    |`.___.';
-           (_,...'(_,.`__)/'.....+
-                """;
-            case "rabbit" -> """
-                    ,
-                   /|      __
-                  / |   ,-~ /
-                 Y :|  //  /
-                 | jj /( .^
-                 >-"~"-v"
-                /       Y
-                jo  o    |
-               ( ~T~     j
-                >._-' _./
-              /   "~"  |
-             Y     _,  |
-            /| ;-"~ _  l
-           / l/ ,-"~    \\
-           \\//\\/      .- \\
-            Y        /    Y
-            l       I     !
-            ]\\      _\\    /"\\
-           (" ~----( ~   Y.  )
-                """;
-            case "tiger" -> """
-                 ('__')
-                 ( oo )
-                 (_)_)
-                """;
-            case "dragon" -> """
-                                _ ___                /^^\\ /^\\  /^^\\_
-                    _          _@)@) \\            ,,/ '` ~ `'~~ ', `\\.
-                _/o\\_ _ _ _/~`.`...'~\\        ./~~..,'`','',.,' '  ~:
-                / `,'.~,~.~  .   , . , ~|,   ,/ .,' , ,. .. ,,.   `,  ~\\_
-                ( ' _' _ '_` _  '  .    , `\\_/ .' ..' '  `  `   `..  `,   \\_
-                ~V~ V~ V~ V~ ~\\ `   ' .  '    , ' .,.,''`.,.''`.,.``. ',   \\_
-                _/\\ /\\ /\\ /\\_/, . ' ,   `_/~\\_ .' .,. ,, , _/~\\_ `. `. '.,  \\_
-                < ~ ~ '~`'~'`, .,  .   `_: ::: \\_ '      `_/ ::: \\_ `.,' . ',  \\_
-                \\ ' `_  '`_    _    ',/ _::_::_ \\ _    _/ _::_::_ \\   `.,'.,`., \\-,-,-,_,_,
-                `'~~ `'~~ `'~~ `'~~  \\(_)(_)(_)/  `~~' \\(_)(_)(_)/ ~'`\\_.._,._,'_;_;_;_;_;
-                """;
-            default -> "No mascot selected. Set APP_ANIMAL environment variable.";
-        };
+        switch (animal.toLowerCase()) {
+            case "monkey":
+                return "  __\n" +
+                       " /  \\\n" +
+                       "|  o o |\n" +
+                       " \\_^_/\n";
+            case "canary":
+                return "   (\n" +
+                       "  ( )\n" +
+                       " /   \\\n" +
+                       "(___ _)\n";
+            case "dog":
+                return "   __\n" +
+                       " /    \\\n" +
+                       "/ ..|\\ \\\n" +
+                       "(_\\_|_ )\n";
+            case "cat":
+                return " /\\_/\\\n" +
+                       "( o.o )\n" +
+                       " > ^ <\n";
+            case "mouse":
+                return " _  _\n" +
+                       "(o)(o)\n" +
+                       " \\../\n";
+            case "tiger":
+                return " ('__')\n" +
+                       " ( oo )\n" +
+                       " (_)_) \n";
+            case "dragon":
+                return "        \\\n" +
+                       "       (o>\n" +
+                       "   \\\\  //\\\n" +
+                       "    \\\\V_/_\n";
+            default:
+                return "No mascot selected. Set APP_ANIMAL environment variable.";
+        }
     }
 
     /**
@@ -284,15 +235,32 @@ public class CatalogApi {
         }
     }
 
-    record Item(int id, String name, String description, double price) {
+    /**
+     * Standard Class (Java 11 Compatible)
+     * Replaces Java 16 Record
+     */
+    static class Item {
+        private final int id;
+        private final String name;
+        private final String description;
+        private final double price;
+
+        public Item(int id, String name, String description, double price) {
+            this.id = id;
+            this.name = name;
+            this.description = description;
+            this.price = price;
+        }
+
         public String toJson() {
-            return """
-                {
-                    "id": %d,
-                    "name": "%s",
-                    "description": "%s",
-                    "price": %.2f
-                }""".formatted(id, name, description, price);
+            // Replaced Text Block and .formatted()
+            return String.format(
+                "{\n" +
+                "    \"id\": %d,\n" +
+                "    \"name\": \"%s\",\n" +
+                "    \"description\": \"%s\",\n" +
+                "    \"price\": %.2f\n" +
+                "}", id, name, description, price);
         }
     }
 }
