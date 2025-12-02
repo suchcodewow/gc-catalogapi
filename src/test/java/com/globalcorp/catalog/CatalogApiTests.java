@@ -51,22 +51,22 @@ public class CatalogApiTests {
 
     @Test
     public void testGetValidItem10() {
-        assertResponse("/items/10", 200, "\"id\": 50");
+        assertResponse("/items/10", 200, "\"id\": 10");
     }
 
     @Test
     public void testGetValidItem20() {
-        assertResponse("/items/20", 200, "\"id\": 50");
+        assertResponse("/items/20", 200, "\"id\": 20");
     }
 
     @Test
     public void testGetValidItem30() {
-        assertResponse("/items/30", 200, "\"id\": 50");
+        assertResponse("/items/30", 200, "\"id\": 30");
     }
 
     @Test
     public void testGetValidItem40() {
-        assertResponse("/items/40", 200, "\"id\": 50");
+        assertResponse("/items/40", 200, "\"id\": 40");
     }
     
     @Test
