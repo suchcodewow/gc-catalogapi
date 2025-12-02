@@ -38,6 +38,12 @@ public class CatalogApiTests {
     }
 
     @Test
+    public void testStatusPage() {
+       // assertResponse("/", 200, "\"status\": \"OK\"");
+       assertResponse("/", 200, "\"status\"");
+    }
+
+    @Test
     public void testGetValidItem() {
         assertResponse("/items/1", 200, "\"id\": 1");
     }
