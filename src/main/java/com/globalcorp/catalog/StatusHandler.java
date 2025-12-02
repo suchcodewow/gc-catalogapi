@@ -45,7 +45,7 @@ public class StatusHandler implements HttpHandler {
 
         var response = String.format(
             "{\n" +
-            "    \"status\": \"RDY\",\n" +
+            "    \"status\": \"OK\",\n" +
             "    \"service\": \"CatalogApi\",\n" +
             "    \"version\": \"%s\",\n" +
             "    \"itemsLoaded\": %d,\n" +
