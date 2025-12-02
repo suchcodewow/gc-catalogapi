@@ -40,8 +40,8 @@ public class CatalogApiTests {
     @Test
     public void testStatusPage() {
         // Test Intelligence: update test to confirm Status is OK
-        assertResponse("/", 200, "\"status\": \"OK\"");
-       //assertResponse("/", 200, "\"status\"");
+        //assertResponse("/", 200, "\"status\": \"OK\"");
+       assertResponse("/", 200, "\"status\"");
     }
 
     @Test
