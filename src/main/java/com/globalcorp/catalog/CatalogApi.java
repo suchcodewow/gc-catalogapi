@@ -1,5 +1,4 @@
 package com.globalcorp.catalog;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
